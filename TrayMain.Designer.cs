@@ -147,6 +147,10 @@
             this.exitToolStripMenuItem.Text = "Exit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
+            // folderBrowserDialog1
+            // 
+            this.folderBrowserDialog1.ShowNewFolderButton = false;
+            // 
             // btnSelectExeDir
             // 
             this.btnSelectExeDir.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -165,6 +169,7 @@
             this.tbExeDir.Location = new System.Drawing.Point(24, 59);
             this.tbExeDir.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.tbExeDir.Name = "tbExeDir";
+            this.tbExeDir.ReadOnly = true;
             this.tbExeDir.Size = new System.Drawing.Size(376, 29);
             this.tbExeDir.TabIndex = 2;
             // 

@@ -15,19 +15,29 @@ namespace NginxTray
     public partial class TrayMain : Form
     {
         private string nginxExe = @"nginx.exe";
-        
 
-        public TrayMain()
+
+        public TrayMain(string[] args)
         {
             InitializeComponent();
 
             nginxTrayItem.Visible = true;
 
             initGui(isNginxRunning());
+
+            if (args.Length > 0)
+            {
+                startNginx();
+            }
         }
 
         private void initGui(bool isRunning)
         {
+            if (!Directory.Exists(getNginxWorkingDir()))
+            {
+                enableAllToolstripMenuItems(Directory.Exists(getNginxWorkingDir()));
+                return;
+            }
             
             versionToolStripMenuItem.Visible = false;
 
@@ -36,7 +46,6 @@ namespace NginxTray
 
             toggleNginxToolStripMenuItem.Enabled = true;
         }
-
 
         // NOT WORKING, could not read STDOUT from nginx
         private string loadNginxVersion()
@@ -82,13 +91,8 @@ namespace NginxTray
             return NginxTray.Properties.Settings.Default.workingDir;
         }
 
-        #endregion
-
-        #region ToolstripItems
-        private void toggleNginxToolStripMenuItem_Click(object sender, EventArgs e)
+        private void startNginx()
         {
-            toggleNginxToolStripMenuItem.Enabled = false;
-
             var process = getNginxProcess();
 
             if (isNginxRunning())
@@ -96,12 +100,21 @@ namespace NginxTray
                 process.StartInfo.Arguments = "-s stop";
                 initGui(false);
             }
-            else 
+            else
             {
                 initGui(true);
             }
 
             process.Start();
+        }
+        #endregion
+
+        #region ToolstripItems
+        private void toggleNginxToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            toggleNginxToolStripMenuItem.Enabled = false;
+
+            startNginx();
         }
 
         private void reloadToolStripMenuItem_Click(object sender, EventArgs e)
@@ -147,6 +160,16 @@ namespace NginxTray
             Application.Exit();
         }
 
+        private void enableAllToolstripMenuItems(bool enabled)
+        {
+            reloadToolStripMenuItem.Enabled = enabled;
+            toggleNginxToolStripMenuItem.Enabled = enabled;
+            exitToolStripMenuItem.Enabled = enabled;
+            logsToolStripMenuItem.Enabled = enabled;
+            configToolStripMenuItem.Enabled = enabled;
+            htmlWwwToolStripMenuItem.Enabled = enabled;
+        }
+
         #endregion
 
         #region Buttons
@@ -163,10 +186,12 @@ namespace NginxTray
         }
 
         private void btnOk_Click(object sender, EventArgs e)
-        {
+        {   
             Properties.Settings.Default.workingDir = tbExeDir.Text;
             Properties.Settings.Default.Save();
             WindowState = FormWindowState.Minimized;
+            
+            enableAllToolstripMenuItems(Directory.Exists(getNginxWorkingDir()));
         }
 
         private void btnCancel_Click_1(object sender, EventArgs e)
@@ -186,6 +211,7 @@ namespace NginxTray
         }
 
         private const int CP_NOCLOSE_BUTTON = 0x200;
+        private string[] args;
         protected override CreateParams CreateParams
         {
             get
